@@ -137,7 +137,7 @@ namespace B2Net.Tests {
 		public void FileUploadTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 
 			// Clean up.
@@ -150,7 +150,7 @@ namespace B2Net.Tests {
 		public void FileUploadUsingUploadUrlTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 
 			var uploadUrl = Client.Files.GetUploadUrl(TestBucket.BucketId).Result;
 
@@ -179,7 +179,7 @@ namespace B2Net.Tests {
 		public void FileUploadWithInfoTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 
 			var fileInfo = new Dictionary<string, string>() {
 				{"FileInfoTest", "1234"}
@@ -199,7 +199,7 @@ namespace B2Net.Tests {
 			var fileName = "B2Test.txt";
 			var bytes = File.ReadAllBytes(Path.Combine(FilePath, fileName));
 			
-			string hash = Utilities.GetSHA1Hash(bytes);
+			string hash = Utilities.GetSha1Hash(bytes);
 			var hashBytes = Encoding.UTF8.GetBytes(hash);
 
 			var fileData = new MemoryStream(bytes.Concat(hashBytes).ToArray());
@@ -235,7 +235,7 @@ namespace B2Net.Tests {
 		public void FileDownloadNameTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 			// Clean up.
 			FilesToDelete.Add(file);
@@ -244,7 +244,7 @@ namespace B2Net.Tests {
 
 			// Test download
 			var download = Client.Files.DownloadByName(file.FileName, TestBucket.BucketName).Result;
-			var downloadHash = Utilities.GetSHA1Hash(download.FileData);
+			var downloadHash = Utilities.GetSha1Hash(download.FileData);
 
 			Assert.AreEqual(hash, downloadHash);
 		}
@@ -253,7 +253,7 @@ namespace B2Net.Tests {
 		public void FileDownloadWithInfoTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 
 			var fileInfo = new Dictionary<string, string>() {
 				{"FileInfoTest", "1234"}
@@ -267,7 +267,7 @@ namespace B2Net.Tests {
 
 			// Test download
 			var download = Client.Files.DownloadById(file.FileId).Result;
-			var downloadHash = Utilities.GetSHA1Hash(download.FileData);
+			var downloadHash = Utilities.GetSha1Hash(download.FileData);
 
 			Assert.AreEqual(hash, downloadHash);
 			Assert.AreEqual(1, download.FileInfo.Count);
@@ -277,7 +277,7 @@ namespace B2Net.Tests {
 		public void FileDownloadIdTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 			// Clean up.
 			FilesToDelete.Add(file);
@@ -286,7 +286,7 @@ namespace B2Net.Tests {
 
 			// Test download
 			var download = Client.Files.DownloadById(file.FileId).Result;
-			var downloadHash = Utilities.GetSHA1Hash(download.FileData);
+			var downloadHash = Utilities.GetSha1Hash(download.FileData);
 
 			Assert.AreEqual(hash, downloadHash);
 		}
@@ -295,7 +295,7 @@ namespace B2Net.Tests {
 		public void FileDownloadFolderTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, "B2Folder/Test/File.txt", TestBucket.BucketId).Result;
 			// Clean up.
 			FilesToDelete.Add(file);
@@ -304,7 +304,7 @@ namespace B2Net.Tests {
 
 			// Test download
 			var download = Client.Files.DownloadById(file.FileId).Result;
-			var downloadHash = Utilities.GetSHA1Hash(download.FileData);
+			var downloadHash = Utilities.GetSha1Hash(download.FileData);
 
 			Assert.AreEqual(hash, downloadHash);
 		}
@@ -313,7 +313,7 @@ namespace B2Net.Tests {
 		public void FileDeleteTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 
 			Assert.AreEqual(hash, file.ContentSHA1, "File hashes did not match.");
@@ -328,7 +328,7 @@ namespace B2Net.Tests {
 		public void ListVersionsTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 			// Clean up.
 			FilesToDelete.Add(file);
@@ -344,7 +344,7 @@ namespace B2Net.Tests {
 		public void GetInfoTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 
 			var fileInfo = new Dictionary<string, string>();
 			fileInfo.Add("FileInfoTest", "1234");

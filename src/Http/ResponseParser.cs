@@ -1,18 +1,24 @@
-﻿using Newtonsoft.Json;
-using System.Net.Http;
+﻿using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace B2Net.Http {
-	public static class ResponseParser {
-		public static async Task<T> ParseResponse<T>(HttpResponseMessage response, string callingApi = "") {
-			var jsonResponse = await response.Content.ReadAsStringAsync();
+namespace B2Net.Http;
 
-			await Utilities.CheckForErrors(response, callingApi);
+public static class ResponseParser {
+	private static JsonSerializerOptions _jsonSerializerOptions = new()
+	{
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+	};
+	
+	public static async Task<T?> ParseResponse<T>(HttpResponseMessage response, string callingApi = "") {
+		var jsonResponse = await response.Content.ReadAsStringAsync();
 
-			var obj = JsonConvert.DeserializeObject<T>(jsonResponse, new JsonSerializerSettings() {
-				NullValueHandling = NullValueHandling.Ignore
-			});
-			return obj;
-		}
+		await Utilities.CheckForErrors(response, callingApi);
+
+		_jsonSerializerOptions = new JsonSerializerOptions() {
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+		};
+		return JsonSerializer.Deserialize<T>(jsonResponse, _jsonSerializerOptions);
 	}
 }

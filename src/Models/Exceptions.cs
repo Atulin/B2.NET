@@ -1,25 +1,18 @@
 ﻿using System;
 
-namespace B2Net.Models {
-	public class AuthorizationException : Exception {
-		public AuthorizationException(string response) : base("There was an error during authorization. See inner exception for details.", new Exception(response)) { }
-	}
-	public class NotAuthorizedException : Exception {
-		public NotAuthorizedException(string message) : base(message) { }
-	}
-	public class CopyReplaceSetupException : Exception {
-		public CopyReplaceSetupException(string message) : base(message) { }
-	}
+namespace B2Net.Models;
 
-	public class B2Exception : Exception {
-		public string Status { get; set; }
-		public string Code { get; set; }
-		public bool ShouldRetryRequest { get; set; }
+public class AuthorizationException(string response) : Exception("There was an error during authorization. See inner exception for details.", new Exception(response));
 
-		public B2Exception(string code, string status, string message, bool shouldRetry) : base(message) {
-			Status = status;
-			Code = code;
-			ShouldRetryRequest = shouldRetry;
-		}
-	}
+public class NotAuthorizedException(string message) : Exception(message);
+
+public class CopyReplaceSetupException(string message) : Exception(message);
+
+public class B2Exception(string? code, string? status, string message, bool shouldRetry)
+	: Exception(message)
+{
+	public string? Status { get; set; } = status;
+	public string? Code { get; set; } = code;
+	public bool ShouldRetryRequest { get; set; } = shouldRetry;
+
 }

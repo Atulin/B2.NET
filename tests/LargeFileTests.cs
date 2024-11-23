@@ -68,7 +68,7 @@ namespace B2Net.Tests {
 			}
 
 		    foreach (var part in parts) {
-		        string hash = Utilities.GetSHA1Hash(part);
+		        string hash = Utilities.GetSha1Hash(part);
                 shas.Add(hash);
             }
 
@@ -116,7 +116,7 @@ namespace B2Net.Tests {
 			}
 
 			foreach (var part in parts.Take(2)) {
-				string hash = Utilities.GetSHA1Hash(part);
+				string hash = Utilities.GetSha1Hash(part);
 				shas.Add(hash);
 			}
 
@@ -164,7 +164,7 @@ namespace B2Net.Tests {
 			}
 
 			foreach (var part in parts.Take(2)) {
-				string hash = Utilities.GetSHA1Hash(part);
+				string hash = Utilities.GetSha1Hash(part);
 				shas.Add(hash);
 			}
 
@@ -208,7 +208,7 @@ namespace B2Net.Tests {
 			}
 
 			foreach (var part in parts.Take(2)) {
-				string hash = Utilities.GetSHA1Hash(part);
+				string hash = Utilities.GetSha1Hash(part);
 				shas.Add(hash);
 			}
 

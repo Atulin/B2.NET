@@ -43,7 +43,7 @@ namespace B2Net.Tests {
 		public void FileGetFriendlyUrlTest() {
 			var fileName = "B2Test.txt";
 			var fileData = File.ReadAllBytes(Path.Combine(FilePath, fileName));
-			string hash = Utilities.GetSHA1Hash(fileData);
+			string hash = Utilities.GetSha1Hash(fileData);
 			var file = Client.Files.Upload(fileData, fileName, TestBucket.BucketId).Result;
 			// Clean up.
 			FilesToDelete.Add(file);
@@ -57,7 +57,7 @@ namespace B2Net.Tests {
 			var client = new HttpClient();
 			var friendFile = client.GetAsync(friendlyUrl).Result;
 			var ffileData = friendFile.Content.ReadAsByteArrayAsync().Result;
-			var downloadHash = Utilities.GetSHA1Hash(ffileData);
+			var downloadHash = Utilities.GetSha1Hash(ffileData);
 
 			Assert.AreEqual(hash, downloadHash);
 		}
