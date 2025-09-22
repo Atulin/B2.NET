@@ -1,3 +1,6 @@
+> [!WARNING]
+> There is a major bug in version 8.0 that prevents JSON serialization of responses from working. The 8.0.1-beta pre-release version fixes this, but requires more testing before being promoted.
+
 # B2.NET
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -562,3 +565,4 @@ From the tests directory run
 dotnet restore
 dotnet test
 ```
+
