@@ -158,7 +158,7 @@ namespace B2Net.Http {
 		}
 
 		public static HttpRequestMessage GetUploadUrl(B2Options options, string bucketId) {
-			var json = JsonSerializer.Serialize(new { bucketId });
+			var json = Utilities.JsonSerialize(new { bucketId });
 			return BaseRequestGenerator.PostRequest(Endpoints.GetUploadUrl, json, options);
 		}
 	}

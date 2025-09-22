@@ -19,7 +19,7 @@ namespace B2Net.Http.RequestGenerators {
 			public const string CopyPart = "b2_copy_part";
 		}
 
-		public static HttpRequestMessage Start(B2Options options, string bucketId, string fileName, string contentType, B2LargeFileRetention fileRetention, Dictionary<string, string> fileInfo = null) {
+		public static HttpRequestMessage Start(B2Options options, string bucketId, string fileName, string contentType, B2FileRetentionSettings fileRetention, Dictionary<string, string> fileInfo = null) {
 			var uri = new Uri(options.ApiUrl + "/b2api/" + Constants.Version + "/" + Endpoints.Start);
 			
 			var serializerOptions = new JsonSerializerOptions { 
@@ -90,7 +90,7 @@ namespace B2Net.Http.RequestGenerators {
 		}
 
 		public static HttpRequestMessage Finish(B2Options options, string fileId, string[] partSHA1Array) {
-			var content = JsonSerializer.Serialize(new { fileId, partSha1Array = partSHA1Array });
+			var content = Utilities.JsonSerialize(new { fileId, partSha1Array = partSHA1Array });
 			var request = BaseRequestGenerator.PostRequestJson(Endpoints.Finish, content, options);
 			return request;
 		}
@@ -100,13 +100,13 @@ namespace B2Net.Http.RequestGenerators {
 				throw new Exception("Start part number must be between 1 and 10,000");
 			}
 
-			var content = JsonSerializer.Serialize(new { fileId, startPartNumber, maxPartCount });
+			var content = Utilities.JsonSerialize(new { fileId, startPartNumber, maxPartCount });
 			var request = BaseRequestGenerator.PostRequestJson(Endpoints.ListParts, content, options);
 			return request;
 		}
 
 		public static HttpRequestMessage Cancel(B2Options options, string fileId) {
-			var content = JsonSerializer.Serialize(new { fileId });
+			var content = Utilities.JsonSerialize(new { fileId });
 			var request = BaseRequestGenerator.PostRequestJson(Endpoints.Cancel, content, options);
 			return request;
 		}
@@ -123,7 +123,7 @@ namespace B2Net.Http.RequestGenerators {
 				properties.Add("maxFileCount", maxFileCount);
 			}
 			
-			var json = JsonSerializer.Serialize(properties);
+			var json = Utilities.JsonSerialize(properties);
 			var request = BaseRequestGenerator.PostRequestJson(Endpoints.IncompleteFiles, json, options);
 			return request;
 		}
@@ -138,7 +138,7 @@ namespace B2Net.Http.RequestGenerators {
 			if (!string.IsNullOrWhiteSpace(range)) {
 				payload.Add("range", range);
 			}
-			var content = JsonSerializer.Serialize(payload);
+			var content = Utilities.JsonSerialize(payload);
 			var request = new HttpRequestMessage() {
 				Method = HttpMethod.Post,
 				RequestUri = uri,

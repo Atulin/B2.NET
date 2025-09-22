@@ -36,7 +36,7 @@ namespace B2Net.Http {
 			if (metadataDirective == B2MetadataDirective.REPLACE && fileInfo != null && fileInfo.Count > 0) {
 				payload.Add("fileInfo", fileInfo);
 			}
-			var json = JsonSerializer.Serialize(payload);
+			var json = Utilities.JsonSerialize(payload);
 
 			var request = new HttpRequestMessage() {
 				Method = HttpMethod.Post,

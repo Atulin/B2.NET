@@ -3,6 +3,7 @@
 namespace B2Net.Models {
 	public class B2Bucket {
 		public string BucketId { get; set; }
+		public string AccountId { get; set; }
 		public string BucketName { get; set; }
 		public string BucketType { get; set; }
 		public Dictionary<string, string> BucketInfo { get; set; }

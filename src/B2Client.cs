@@ -129,7 +129,7 @@ namespace B2Net {
 
 			var jsonResponse = await response.Content.ReadAsStringAsync();
 			if (response.IsSuccessStatusCode) {
-				var authResponse = JsonSerializer.Deserialize<B2AuthResponse>(jsonResponse);
+				var authResponse = Utilities.JsonDeserialize<B2AuthResponse>(jsonResponse);
 
 				options.SetState(authResponse);
 			} else if (response.StatusCode == HttpStatusCode.Unauthorized) {

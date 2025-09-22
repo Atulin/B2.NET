@@ -17,12 +17,12 @@ namespace B2Net.Http {
 		}
 
 		public static HttpRequestMessage GetBucketList(B2Options options) {
-			var json = JsonSerializer.Serialize(new { accountId = options.AccountId });
+			var json = Utilities.JsonSerialize(new { accountId = options.AccountId });
 			return BaseRequestGenerator.PostRequest(Endpoints.List, json, options);
 		}
 
 		public static HttpRequestMessage DeleteBucket(B2Options options, string bucketId) {
-			var json = JsonSerializer.Serialize(new { accountId = options.AccountId, bucketId });
+			var json = Utilities.JsonSerialize(new { accountId = options.AccountId, bucketId });
 			return BaseRequestGenerator.PostRequest(Endpoints.Delete, json, options);
 		}
 
@@ -41,7 +41,7 @@ namespace B2Net.Http {
                             must be at least 6 characters long, and can be at most 50 characters long");
 			}
 
-			var json = JsonSerializer.Serialize(new { accountId = options.AccountId, bucketName, bucketType });
+			var json = Utilities.JsonSerialize(new { accountId = options.AccountId, bucketName, bucketType });
 			return BaseRequestGenerator.PostRequest(Endpoints.Create, json, options);
 		}
 
@@ -95,7 +95,7 @@ namespace B2Net.Http {
 				body.corsRules = bucketOptions.CORSRules;
 			}
 
-			var json = JsonSerialize(body);
+			var json = Utilities.JsonSerialize(body);
 			return BaseRequestGenerator.PostRequest(Endpoints.Create, json, options);
 		}
 
@@ -105,7 +105,7 @@ namespace B2Net.Http {
 		/// <param name="options"></param>
 		/// <returns></returns>
 		public static HttpRequestMessage UpdateBucket(B2Options options, string bucketId, string bucketType) {
-			var json = JsonSerializer.Serialize(new { accountId = options.AccountId, bucketId, bucketType });
+			var json = Utilities.JsonSerialize(new { accountId = options.AccountId, bucketId, bucketType });
 			return BaseRequestGenerator.PostRequest(Endpoints.Update, json, options);
 		}
 
@@ -166,13 +166,8 @@ namespace B2Net.Http {
 				body.defaultRetention = bucketOptions.DefaultRetention;
 			}
 
-			var json = JsonSerialize(body);
+			var json = Utilities.JsonSerialize(body);
 			return BaseRequestGenerator.PostRequest(Endpoints.Update, json, options);
-		}
-
-		private static string JsonSerialize(object data) {
-			var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-			return JsonSerializer.Serialize(data, options);
 		}
 	}
 

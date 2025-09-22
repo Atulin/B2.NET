@@ -9,8 +9,12 @@ namespace B2Net.Http {
 
 			await Utilities.CheckForErrors(response, callingApi);
 
-			var obj = JsonSerializer.Deserialize<T>(jsonResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-			return obj;
+			try {
+				var obj = Utilities.JsonDeserialize<T>(jsonResponse);
+				return obj;
+			} catch (System.Exception ex) {
+				throw;
+			}
 		}
 	}
 }

@@ -69,7 +69,7 @@ namespace B2Net {
 		/// <param name="bucketId"></param>
 		/// <param name="cancelToken"></param>
 		/// <returns></returns>
-		Task<B2File> StartLargeFile(string fileName, B2LargeFileRetention fileRetention, string contentType = "", string bucketId = "", Dictionary<string, string> fileInfo = null, CancellationToken cancelToken = default(CancellationToken));
+		Task<B2File> StartLargeFile(string fileName, B2FileRetentionSettings fileRetention, string contentType = "", string bucketId = "", Dictionary<string, string> fileInfo = null, CancellationToken cancelToken = default(CancellationToken));
 
 		/// <summary>
 		/// Upload one part of an already started large file upload.

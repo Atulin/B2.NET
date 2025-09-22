@@ -143,7 +143,7 @@ namespace B2Net.Tests {
 #endif
 
 			try {
-				start = await Client.LargeFiles.StartLargeFile(fileName, new B2LargeFileRetention() {
+				start = await Client.LargeFiles.StartLargeFile(fileName, new B2FileRetentionSettings() {
 					Mode = RetentionMode.governance,
 					RetainUntilTimestamp = unixTimeMilliseconds
 				}, "", TestBucket.BucketId);
@@ -166,7 +166,7 @@ namespace B2Net.Tests {
 
 
 			Assert.AreEqual(start.FileId, finish.FileId, "File Ids did not match.");
-			Assert.AreEqual(RetentionMode.governance.ToString(), start.FileRetention.Value.Mode, "File retention mode was not returned correctly.");
+			Assert.AreEqual(RetentionMode.governance, start.FileRetention.Value.Mode, "File retention mode was not returned correctly.");
 			Assert.AreEqual(unixTimeMilliseconds, start.FileRetention.Value.RetainUntilTimestamp, "File retention timestamp was not returned correctly.");
 		}
 

@@ -19,7 +19,7 @@ namespace B2Net.Http {
 		public static HttpRequestMessage DownloadById(B2Options options, string fileId, string byteRange = "") {
 			var uri = new Uri(options.DownloadUrl + "/b2api/" + Constants.Version + "/" + Endpoints.DownloadById);
 
-			var json = JsonSerializer.Serialize(new { fileId });
+			var json = Utilities.JsonSerialize(new { fileId });
 			var request = new HttpRequestMessage() {
 				Method = HttpMethod.Post,
 				RequestUri = uri,

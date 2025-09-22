@@ -300,10 +300,36 @@ var fileList = await client.Files.GetList("BUCKETID", "FILENAME", prefix: "PREFI
 ```
 
 #### Upload a file
+> [!NOTE]
+> The Upload methods that don't use B2FileUploadContext are deprecated. The new B2FileUploadContext approach provides a more structured and extensible way to handle file uploads.
+
 ```csharp
 var client = new B2Client("KEYID", "APPLICATIONKEY");
 var uploadUrl = await client.Files.GetUploadUrl("BUCKETID");
-var file = await client.Files.Upload("FILEDATABYTES", "FILENAME", "CONTENTTYPE", uploadUrl, "AUTORETRY", "BUCKETID", "FILEINFOATTRS");
+
+// Simple upload
+var file = await client.Files.Upload(fileDataBytes, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl
+});
+
+// Upload with additional options
+var file = await client.Files.Upload(fileDataBytes, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl,
+    ContentType = "CONTENTTYPE",
+    AutoRetry = true,
+    AdditionalFileInfo = new Dictionary<string, string>() {
+        { "key", "value" }
+    },
+    ContentDisposition = "attachment; filename=\"FILENAME\"",
+    ContentLanguage = "en-US",
+    CacheControl = "max-age=3600",
+    ContentEncoding = ContentEncoding.gzip,
+    LegalHold = true,
+    RetentionMode = RetentionMode.compliance,
+    RetainUntilTimestamp = 1640995200000 // milliseconds since Unix epoch
+});
 // { FileId: "",
 //   FileName: "",
 //   Action: "",
@@ -318,6 +344,9 @@ var file = await client.Files.Upload("FILEDATABYTES", "FILENAME", "CONTENTTYPE",
 ```
 
 #### Upload a file via Stream
+> [!NOTE]
+> The Upload methods that don't use B2FileUploadContext are deprecated. The new B2FileUploadContext approach provides a more structured and extensible way to handle file uploads.
+
 Please note that there are certain limitations when using Streams for upload. Firstly, If you want to use SHA1 hash verification on your uploads
 you will have to append the SHA1 to the end of your data stream. The library will not do this for you. It is up to you to decide how to get the SHA1
 based on the type of stream you have and how you are handling it. Secondly, you may disable SHA1 verification on the upload by setting the `dontSHA`
@@ -325,7 +354,30 @@ flag to true.
 ```csharp
 var client = new B2Client("KEYID", "APPLICATIONKEY");
 var uploadUrl = await client.Files.GetUploadUrl("BUCKETID");
-var file = await client.Files.Upload("FILESTREAM", "FILENAME", "CONTENTTYPE", uploadUrl, "AUTORETRY", dontSHA, "BUCKETID", "FILEINFOATTRS");
+
+// Simple stream upload
+var file = await client.Files.Upload(fileStream, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl
+}, dontSHA: false);
+
+// Stream upload with additional options
+var file = await client.Files.Upload(fileStream, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl,
+    ContentType = "CONTENTTYPE",
+    AutoRetry = true,
+    AdditionalFileInfo = new Dictionary<string, string>() {
+        { "key", "value" }
+    },
+    ContentDisposition = "attachment; filename=\"FILENAME\"",
+    ContentLanguage = "en-US",
+    CacheControl = "max-age=3600",
+    ContentEncoding = ContentEncoding.gzip,
+    LegalHold = true,
+    RetentionMode = RetentionMode.compliance,
+    RetainUntilTimestamp = 1640995200000 // milliseconds since Unix epoch
+}, dontSHA: false);
 // { FileId: "",
 //   FileName: "",
 //   Action: "",

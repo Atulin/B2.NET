@@ -36,7 +36,7 @@ namespace B2Net.Http {
 				properties.Add("delimiter", delimiter);
 			}
 			
-			var json = JsonSerializer.Serialize(properties);
+			var json = Utilities.JsonSerialize(properties);
 			return BaseRequestGenerator.PostRequest(Endpoints.List, json, options);
 		}
 
@@ -61,7 +61,7 @@ namespace B2Net.Http {
 				properties.Add("delimiter", delimiter);
 			}
 			
-			var json = JsonSerializer.Serialize(properties);
+			var json = Utilities.JsonSerialize(properties);
 			return BaseRequestGenerator.PostRequest(Endpoints.Versions, json, options);
 		}
 
@@ -77,17 +77,17 @@ namespace B2Net.Http {
 				properties.Add("fileId", fileId);
 			}
 			
-			var json = JsonSerializer.Serialize(properties);
+			var json = Utilities.JsonSerialize(properties);
 			return BaseRequestGenerator.PostRequest(Endpoints.Hide, json, options);
 		}
 
 		public static HttpRequestMessage GetInfo(B2Options options, string fileId) {
-			var json = JsonSerializer.Serialize(new { fileId });
+			var json = Utilities.JsonSerialize(new { fileId });
 			return BaseRequestGenerator.PostRequest(Endpoints.Info, json, options);
 		}
 
-		public static HttpRequestMessage UpdateFileRetention(B2Options options, string fileName, string fileId, B2DefaultRetention fileRetention, bool bypassGovernance = false) {
-			var json = JsonSerializer.Serialize(new {
+		public static HttpRequestMessage UpdateFileRetention(B2Options options, string fileName, string fileId, B2FileRetentionSettings fileRetention, bool bypassGovernance = false) {
+			var json = Utilities.JsonSerialize(new {
 				fileName,
 				fileId,
 				fileRetention,

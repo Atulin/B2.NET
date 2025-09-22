@@ -1,10 +1,11 @@
 ﻿using B2Net.Models;
-using System.Text.Json;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace B2Net {
@@ -29,13 +30,13 @@ namespace B2Net {
 
 				B2Error b2Error;
 				try {
-					b2Error = JsonSerializer.Deserialize<B2Error>(content);
+					b2Error = JsonDeserialize<B2Error>(content);
 				} catch (Exception ex) {
 					throw new Exception("Seralization of the response failed. See inner exception for response contents and serialization error.", ex);
 				}
 				if (b2Error != null) {
 					// If calling API is supplied, append to the error message
-					if (!string.IsNullOrEmpty(callingApi) && b2Error.Code == "401") {
+					if (!string.IsNullOrEmpty(callingApi) && b2Error.Status == 401) {
 						b2Error.Message = $"Unauthorized error when operating on {callingApi}. Are you sure the key you are using has access? {b2Error.Message}";
 					}
 					throw new B2Exception(b2Error.Code, b2Error.Status, b2Error.Message, retry);
@@ -68,10 +69,23 @@ namespace B2Net {
 			return sb.ToString();
 		}
 
+		public static string JsonSerialize(object data) {
+			var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+			return JsonSerializer.Serialize(data, options);
+		}
+
+		public static T JsonDeserialize<T>(string data) {
+			var options = new JsonSerializerOptions { 
+				PropertyNameCaseInsensitive = true,
+				NumberHandling = JsonNumberHandling.AllowReadingFromString
+				};
+			return JsonSerializer.Deserialize<T>(data, options);
+		}
+
 		internal class B2Error {
 			public string Code { get; set; }
 			public string Message { get; set; }
-			public string Status { get; set; }
+			public int Status { get; set; }
 		}
 	}
 

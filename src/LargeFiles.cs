@@ -20,7 +20,7 @@ namespace B2Net {
 			_client = HttpClientFactory.CreateHttpClient(options.RequestTimeout);
 		}
 
-		public async Task<B2File> StartLargeFile(string fileName, B2LargeFileRetention fileRetention, string contentType = "", string bucketId = "", Dictionary<string, string> fileInfo = null, CancellationToken cancelToken = default(CancellationToken)) {
+		public async Task<B2File> StartLargeFile(string fileName, B2FileRetentionSettings fileRetention, string contentType = "", string bucketId = "", Dictionary<string, string> fileInfo = null, CancellationToken cancelToken = default(CancellationToken)) {
 			RefreshAuthorization(_options, _authorize);
 			var operationalBucketId = Utilities.DetermineBucketId(_options, bucketId);
 

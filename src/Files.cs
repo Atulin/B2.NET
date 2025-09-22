@@ -88,7 +88,7 @@ namespace B2Net {
 			var uploadUrlRequest = FileUploadRequestGenerators.GetUploadUrl(_options, operationalBucketId);
 			var uploadUrlResponse = await _client.SendAsync(uploadUrlRequest, cancelToken);
 			var uploadUrlData = await uploadUrlResponse.Content.ReadAsStringAsync();
-			var uploadUrlObject = JsonSerializer.Deserialize<B2UploadUrl>(uploadUrlData);
+			var uploadUrlObject = Utilities.JsonDeserialize<B2UploadUrl>(uploadUrlData);
 			// Set the upload auth token
 			_options.UploadAuthorizationToken = uploadUrlObject.AuthorizationToken;
 
@@ -138,15 +138,35 @@ namespace B2Net {
 				B2UploadUrl = uploadUrl
 			}, cancelToken);
 		}
+		
+		[Obsolete("This method has been deprecated in favor of the B2FileUploadContext overload.", false)]
+		public async Task<B2File> Upload(Stream fileDataWithSHA, string fileName, B2UploadUrl uploadUrl, string contentType, bool autoRetry, string bucketId = "", Dictionary<string, string> fileInfo = null, bool dontSHA = false,
+			CancellationToken cancelToken = default(CancellationToken)) {
+			return await Upload(fileDataWithSHA, new B2FileUploadContext() {
+				FileName = fileName,
+				ContentType = contentType,
+				BucketId = bucketId, 
+				AdditionalFileInfo = fileInfo,
+				B2UploadUrl = uploadUrl,
+				AutoRetry = autoRetry
+			}, dontSHA, cancelToken);
+		}
 
+		/// <summary>
+		/// This method will assume the dontSHA property based on whether ContentSHA is supplied or not. If a ContentSHA is provided, the call will use SHA1 verification.
+		/// </summary>
+		/// <param name="fileData"></param>
+		/// <param name="uploadContext"></param>
+		/// <param name="cancelToken"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
 		public async Task<B2File> Upload(byte[] fileData, B2FileUploadContext uploadContext, CancellationToken cancelToken = default(CancellationToken)) {
 			if (uploadContext.B2UploadUrl?.UploadUrl == null) {
 				throw new ArgumentNullException(nameof(B2UploadUrl.UploadUrl), "You did not provide an UploadUrl in the B2UploadUrl object.");
 			}
 			RefreshAuthorization(_options, _authorize);
 			// Now we can upload the file
-			var streamify = new MemoryStream(fileData);
-			var requestMessage = FileUploadRequestGenerators.Upload(_options, uploadContext.B2UploadUrl.UploadUrl, streamify, uploadContext);
+			var requestMessage = FileUploadRequestGenerators.Upload(_options, uploadContext.B2UploadUrl.UploadUrl, fileData, uploadContext.FileName, uploadContext.AdditionalFileInfo, uploadContext.ContentType);
 
 			var response = await _client.SendAsync(requestMessage, cancelToken);
 			// Auto retry
@@ -162,18 +182,14 @@ namespace B2Net {
 			return await ResponseParser.ParseResponse<B2File>(response, _api);
 		}
 
-		public async Task<B2File> Upload(Stream fileDataWithSHA, string fileName, B2UploadUrl uploadUrl, string contentType, bool autoRetry, string bucketId = "", Dictionary<string, string> fileInfo = null, bool dontSHA = false,
-			CancellationToken cancelToken = default(CancellationToken)) {
-			return await Upload(fileDataWithSHA, new B2FileUploadContext() {
-				FileName = fileName,
-				ContentType = contentType,
-				BucketId = bucketId, 
-				AdditionalFileInfo = fileInfo,
-				B2UploadUrl = uploadUrl,
-				AutoRetry = autoRetry
-			}, dontSHA, cancelToken);
-		}
-
+		/// <summary>
+		/// Upload file data with a SHA1 hash already appended.
+		/// </summary>
+		/// <param name="fileDataWithSHA">SHA1 hash must be appended to the file data</param>
+		/// <param name="uploadContext"></param>
+		/// <param name="dontSHA"></param>
+		/// <param name="cancelToken"></param>
+		/// <returns></returns>
 		public async Task<B2File> Upload(Stream fileDataWithSHA, B2FileUploadContext uploadContext, bool dontSHA = false,
 			CancellationToken cancelToken = default(CancellationToken)) {
 			RefreshAuthorization(_options, _authorize);
@@ -254,7 +270,13 @@ namespace B2Net {
 			return await ResponseParser.ParseResponse<B2File>(response, _api);
 		}
 
-
+		/// <summary>
+		/// This is an unsupported API and may change without notice.
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <param name="bucketName"></param>
+		/// <param name="cancelToken"></param>
+		/// <returns></returns>
 		public string GetFriendlyDownloadUrl(string fileName, string bucketName, CancellationToken cancelToken = default(CancellationToken)) {
 			var downloadUrl = _options.DownloadUrl;
 			var friendlyUrl = "";
@@ -298,7 +320,16 @@ namespace B2Net {
 			return await ResponseParser.ParseResponse<B2File>(response, _api);
 		}
 
-		public async Task<B2FileRetentionResponse> UpdateFileRetention(string fileName, string fileId, B2DefaultRetention fileRetention, bool bypassGovernance = false, CancellationToken cancelToken = default(CancellationToken)) {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <param name="fileId"></param>
+		/// <param name="fileRetention"></param>
+		/// <param name="bypassGovernance">Must be specified and set to true if deleting an existing governance mode retention setting or shortening an existing governance mode retention period</param>
+		/// <param name="cancelToken"></param>
+		/// <returns></returns>
+		public async Task<B2FileRetentionResponse> UpdateFileRetention(string fileName, string fileId, B2FileRetentionSettings fileRetention, bool bypassGovernance = false, CancellationToken cancelToken = default(CancellationToken)) {
 			RefreshAuthorization(_options, _authorize);
 			
 			var request = FileMetaDataRequestGenerators.UpdateFileRetention(_options, fileName, fileId, fileRetention, bypassGovernance);
@@ -347,7 +378,7 @@ namespace B2Net {
 			// File Lock Headers
 			if (response.Headers.TryGetValues("X-Bz-File-Retention-Mode", out values)) {
 				try {
-					file.FileRetention = JsonSerializer.Deserialize<FileRetentionReturn>(values.First());
+					file.FileRetention = Utilities.JsonDeserialize<FileRetentionReturn>(values.First());
 				}
 				catch (Exception e) {
 					throw new Exception("Could not deserialize the FileRetention Headers from the download response. See inner exception for details.", e);
@@ -377,8 +408,7 @@ namespace B2Net {
 			}
 			file.FileInfo = infoData;
 			if (response.Content.Headers.ContentLength.HasValue) {
-				// This sucks, but the ContentLength property is a string.
-				file.ContentLength = response.Content.Headers.ContentLength.Value.ToString();
+				file.ContentLength = response.Content.Headers.ContentLength.Value;
 			}
 			file.FileData = await response.Content.ReadAsByteArrayAsync();
 

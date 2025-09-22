@@ -278,6 +278,6 @@ namespace B2Net {
 		/// <param name="fileRetention"></param>
 		/// <param name="bypassGovernance">Must be specified and set to true if deleting an existing governance mode retention setting or shortening an existing governance mode retention period</param>
 		/// <returns></returns>
-		Task<B2FileRetentionResponse> UpdateFileRetention(string fileName, string fileId, B2DefaultRetention fileRetention, bool bypassGovernance = false, CancellationToken cancelToken = default(CancellationToken));
+		Task<B2FileRetentionResponse> UpdateFileRetention(string fileName, string fileId, B2FileRetentionSettings fileRetention, bool bypassGovernance = false, CancellationToken cancelToken = default(CancellationToken));
 	}
 }
