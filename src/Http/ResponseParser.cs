@@ -1,20 +1,17 @@
-﻿using System.Text.Json;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace B2Net.Http {
-	public static class ResponseParser {
-		public static async Task<T> ParseResponse<T>(HttpResponseMessage response, string callingApi = "") {
-			var jsonResponse = await response.Content.ReadAsStringAsync();
+namespace B2Net.Http;
 
-			await Utilities.CheckForErrors(response, callingApi);
+public static class ResponseParser
+{
+	public static async Task<T> ParseResponse<T>(HttpResponseMessage response, string callingApi = "")
+	{
+		var jsonResponse = await response.Content.ReadAsStringAsync();
 
-			try {
-				var obj = Utilities.JsonDeserialize<T>(jsonResponse);
-				return obj;
-			} catch (System.Exception ex) {
-				throw;
-			}
-		}
+		await Utilities.CheckForErrors(response, callingApi);
+
+		var obj = Utilities.JsonDeserialize<T>(jsonResponse);
+		return obj;
 	}
 }

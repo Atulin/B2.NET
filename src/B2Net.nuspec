@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<package >
-  <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <projectUrl>https://github.com/coryrwest/B2.NET</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
-    <copyright>Copyright 2017</copyright>
-    <tags>B2 Cloud Storage Backblaze</tags>
-	<license type="file">LICENSE</license>
-  </metadata>
+<package>
+	<metadata>
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<projectUrl>https://github.com/coryrwest/B2.NET</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>$description$</description>
+		<copyright>Copyright 2017</copyright>
+		<tags>B2 Cloud Storage Backblaze</tags>
+		<license type="file">LICENSE</license>
+	</metadata>
 </package>

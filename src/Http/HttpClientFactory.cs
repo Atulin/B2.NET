@@ -4,13 +4,16 @@ using System.Net.Http.Headers;
 
 namespace B2Net.Http;
 
-public static class HttpClientFactory {
+public static class HttpClientFactory
+{
 	private static HttpClient _client;
 
-	public static HttpClient CreateHttpClient(int timeout) {
+	public static HttpClient CreateHttpClient(int timeout)
+	{
 		var client = _client;
-		if (client == null) {
-			var handler = new HttpClientHandler() { AllowAutoRedirect = true };
+		if (client == null)
+		{
+			var handler = new HttpClientHandler { AllowAutoRedirect = true };
 
 			client = new HttpClient(handler);
 

@@ -1,11 +1,12 @@
-﻿using B2Net.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using B2Net.Models;
 
 namespace B2Net;
 
-public interface IBuckets {
+public interface IBuckets
+{
 	Task<B2Bucket?> Create(string bucketName, B2BucketOptions options, CancellationToken cancelToken = default);
 	Task<B2Bucket?> Create(string bucketName, BucketTypes bucketType, CancellationToken cancelToken = default);
 	Task<B2Bucket?> Delete(string bucketId = "", CancellationToken cancelToken = default);

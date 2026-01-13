@@ -1,7 +1,8 @@
-﻿namespace B2Net.Models {
-	public enum BucketTypes {
-		allPublic,
-		allPrivate,
-		snapshot
-	}
+﻿namespace B2Net.Models;
+
+public enum BucketTypes
+{
+	allPublic,
+	allPrivate,
+	snapshot
 }

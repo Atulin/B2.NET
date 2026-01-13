@@ -1,14 +1,17 @@
-﻿using B2Net.Models;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using B2Net.Models;
 
 namespace B2Net.Http.RequestGenerators;
 
-public static class BaseRequestGenerator {
-	public static HttpRequestMessage PostRequest(string endpoint, string body, B2Options options) {
+public static class BaseRequestGenerator
+{
+	public static HttpRequestMessage PostRequest(string endpoint, string body, B2Options options)
+	{
 		var uri = new Uri(options.ApiUrl + "/b2api/" + Constants.Version + "/" + endpoint);
-		var request = new HttpRequestMessage {
+		var request = new HttpRequestMessage
+		{
 			Method = HttpMethod.Post,
 			RequestUri = uri,
 			Content = new StringContent(body)
@@ -19,9 +22,11 @@ public static class BaseRequestGenerator {
 		return request;
 	}
 
-	public static HttpRequestMessage PostRequestJson(string endpoint, string body, B2Options options) {
+	public static HttpRequestMessage PostRequestJson(string endpoint, string body, B2Options options)
+	{
 		var uri = new Uri(options.ApiUrl + "/b2api/" + Constants.Version + "/" + endpoint);
-		var request = new HttpRequestMessage {
+		var request = new HttpRequestMessage
+		{
 			Method = HttpMethod.Post,
 			RequestUri = uri,
 			Content = new StringContent(body)

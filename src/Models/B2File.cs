@@ -1,34 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace B2Net.Models {
-	public class B2File {
-		public string FileId { get; set; }
-		public string FileName { get; set; }
-		public string Action { get; set; }
-		/// <summary>
-		/// DEPRECATED: Size will always be the same as ContentLength.
-		/// </summary>
-		public long Size => Convert.ToInt64(ContentLength);
-		public long UploadTimestamp { get; set; }
-		public byte[] FileData { get; set; }
-		public FileRetentionReturn FileRetention { get; set; }
-		public long FileRetentionRetainUntilTimestamp { get; set; }
-		public LegalHold LegalHold { get; set; }
-		public bool LegalHoldBool => LegalHold?.Value == "on";
-		/// <summary>
-		/// List of headers that exist in on the file that the client does not have permission to read.
-		/// </summary>
-		public string[] ClientUnauthorizedToRead { get; set; }
+namespace B2Net.Models;
 
-		// Uploaded File Response
-		public long ContentLength { get; set; }
-		public string ContentSHA1 { get; set; }
-		public string ContentMD5 { get; set; }
-		public string ContentType { get; set; }
-		public Dictionary<string, string> FileInfo { get; set; }
-		// End
+public class B2File
+{
+	public string FileId { get; set; }
+	public string FileName { get; set; }
+	public string Action { get; set; }
+	/// <summary>
+	///     DEPRECATED: Size will always be the same as ContentLength.
+	/// </summary>
+	public long Size => Convert.ToInt64(ContentLength);
+	public long UploadTimestamp { get; set; }
+	public byte[] FileData { get; set; }
+	public FileRetentionReturn FileRetention { get; set; }
+	public long FileRetentionRetainUntilTimestamp { get; set; }
+	public LegalHold LegalHold { get; set; }
+	public bool LegalHoldBool => LegalHold?.Value == "on";
+	/// <summary>
+	///     List of headers that exist in on the file that the client does not have permission to read.
+	/// </summary>
+	public string[] ClientUnauthorizedToRead { get; set; }
 
-		public DateTime UploadTimestampDate => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(UploadTimestamp);
-	}
+	// Uploaded File Response
+	public long ContentLength { get; set; }
+	public string ContentSHA1 { get; set; }
+	public string ContentMD5 { get; set; }
+	public string ContentType { get; set; }
+	public Dictionary<string, string> FileInfo { get; set; }
+	// End
+
+	public DateTime UploadTimestampDate => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(UploadTimestamp);
 }
