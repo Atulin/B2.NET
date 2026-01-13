@@ -1,3 +1,6 @@
+> [!WARNING]
+> There is a major bug in version 8.0 that prevents JSON serialization of responses from working. The 8.0.1-beta pre-release version fixes this, but requires more testing before being promoted.
+
 # B2.NET
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -15,8 +18,11 @@ While the core of B2.NET is mature you should still consider this library in Bet
 *  UFT-8 and Url Encoding support
 *  Fully Async
 *  Full test coverage
-*  Targets .NET 4.5 and .NET Standard 1.5
+*  Targets .NET 4.6 and .NET Standard 2.0
 *  You cannot manage keys with this library, just use already existing ones.
+
+> [!WARNING]
+> This library is not thread-safe currently. There is a global state object that is passed around to hold various configuration values.
 
 ## Install
 [nuget package](https://www.nuget.org/packages/B2Net/)
@@ -44,10 +50,22 @@ var options = new B2Options() {
 var client = new B2Client(options);
 ```
 
+> [!NOTE]  
+> If you are experiencing an SSL error (Error: "The request was aborted: Could not create SSL/TLS secure channel") when initiating requests try adding the below snippet just before client creation. (thanks
+@JM63)
+```
+ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+| SecurityProtocolType.Tls11
+| SecurityProtocolType.Tls12
+| SecurityProtocolType.Ssl3;
+```
+
 ### Authorize
 The `options` object returned from the Authorize method will contain the authorizationToken necessary for subsequent
 calls to the B2 API. This will automatically be handled by the library when necessary. You do not have to keep this object around.
 The `options` object requires KeyId and ApplicationKey to authorize.
+
+**NOTE:** Authorization Tokens automatically expire after 24 hours, in some cases long-lived clients can experience a token timeout. As of v.0.8.0 the client will attempt to get a new token if it detects that it has en expired token. If you want to disable dthis functionality, pass the `NoTokenRefresh` bool in your B2Options object.
 
 #### authorizeOnInitialize
 If you set `authorizeOnInitialize` to false the B2Client will not call the B2 API until you tell it to. This requires that you call Initialize() before making any other calls with the client. The client WILL NOT automatically call this if needed, you MUST call it yourself.
@@ -72,7 +90,60 @@ var bucketId = client.Capabilities.BucketName;
 var capabilities = client.Capabilities.Capabilities;
 // See here for available capabilities: [https://www.backblaze.com/b2/docs/application_keys.html](https://www.backblaze.com/b2/docs/application_keys.html)
 ```
-NOTE: You must call Authorize or have an Authorized client instance before you can access Capabilities. This is because only Backblaze knows the capabilities of a key and that information is returned in the Authorization response.
+**NOTE:** You must call Authorize or have an Authorized client instance before you can access Capabilities. This is because only Backblaze knows the capabilities of a key and that information is returned in the Authorization response.
+
+### Options Object
+```json
+{
+  "accountId": string,
+  "keyId": string,
+  "applicationKey": string,
+  "bucketId": string,
+  "persistBucket": false,
+  "noTokenRefresh": false,
+  "apiUrl": string,
+  "s3ApiUrl": string,
+  "downloadUrl": string,
+  "authorizationToken": string,
+  "capabilities": [
+	{
+	  "bucketName": string,
+	  "bucketId": string,
+	  "namePrefix": string,
+	  "capabilities": string[]
+	}
+  ],
+  "uploadAuthorizationToken": string,
+  "recommendedPartSize": 0,
+  "absoluteMinimumPartSize": 0,
+  "minimumPartSize": 0,
+  "requestTimeout": 0,
+  "authenticated": false,
+  "authTokenExpiration": "0001-01-01T00:00:00"
+}
+```
+| Key | Description |
+| --- | --- |
+| AccountId | ID of your B2 Account, populated from Authorize |
+| KeyId | KeyId for your application key or Master Key |
+| ApplicationKey | Key text for your application or Master key |
+| BucketId | BucketId you are operating on. Use for PersistBucket |
+| PersistBucket | Will persist the BucketId specified across requests |
+| NoTokenRefresh | Will display the automatic token refresh |
+| ApiUrl | URL for the BackBlaze API, populated on Authorize |
+| S3ApiURL | URL for the BackBlaze S3 compatible API, populated on Authorize |
+| DownloadURL | URL used for downloading files from B2, populated on Authorize |
+| AuthorizationToken | Auth Token for the current client instance, expires in 24 hours |
+| Capabilities | List of capabilities of your key |
+| UploadAuthorizationToken | Auth token used for uploads, populated and updated on file upload |
+| RecommendedPartSize | Recommended size from B2 for file uploads, populated on Authorize |
+| AbsoluteMinimumPartSize | Minimum size from B2 for file uploads, populated on Authorize |
+| MinimumPartSize | Minimum size from B2 for file uploads, populated on Authorize |
+| RequestTimeout | Timeout, in seconds, for the HttpClient that calls the B2 API under the hood |
+| Authenticated | Whether the client is authenticated, populated on Authorize |
+|| Used because a client can be initialized without being authorized |
+| AuthTokenExpiration | When the auth token will expire, used internally for determining when a refresh should occur |
+
 
 ### <a name="buckets"></a>Buckets
 #### List Buckets
@@ -108,6 +179,7 @@ var bucket = await client.Buckets.Create("BUCKETNAME", "OPTIONAL_BUCKET_TYPE");
 var client = new B2Client("KEYID", "APPLICATIONKEY");
 var bucket = await client.Buckets.Create("BUCKETNAME", new B2BucketOptions() {
 	CacheControl = 300,
+	FileLockEnabled = false,
 	LifecycleRules = new System.Collections.Generic.List<B2BucketLifecycleRule>() {
 		new B2BucketLifecycleRule() {
 			DaysFromHidingToDeleting = 30,
@@ -125,6 +197,13 @@ var bucket = await client.Buckets.Create("BUCKETNAME", new B2BucketOptions() {
 			MaxAgeSeconds = 1200
 		}
 	},
+	DefaultRetention = new B2DefaultRetention() {
+		Mode = (RetentionMode.governance || RetentionMode.compliance),
+		Period = new Period() {
+			Duration = 30,
+			Unit = string
+		}
+	}
 });
 // { BucketId: "",
 //   BucketName: "",
@@ -169,6 +248,13 @@ var bucket = await client.Buckets.Update(new B2BucketOptions() {
 			MaxAgeSeconds = 1200
 		}
 	},
+	DefaultRetention = new B2DefaultRetention() {
+		Mode = (RetentionMode.governance || RetentionMode.compliance),
+		Period = new Period() {
+			Duration = 30,
+			Unit = string
+		}
+	}
 }, "BUCKETID");
 
 // { BucketId: "",
@@ -215,32 +301,94 @@ var fileList = await client.Files.GetList("BUCKETID", "FILENAME", prefix: "PREFI
 ```
 
 #### Upload a file
+> [!NOTE]
+> The Upload methods that don't use B2FileUploadContext are deprecated. The new B2FileUploadContext approach provides a more structured and extensible way to handle file uploads.
+
 ```csharp
 var client = new B2Client("KEYID", "APPLICATIONKEY");
 var uploadUrl = await client.Files.GetUploadUrl("BUCKETID");
-var file = await client.Files.Upload("FILEDATABYTES", "FILENAME", "CONTENTTYPE", uploadUrl, "AUTORETRY", "BUCKETID", "FILEINFOATTRS");
+
+// Simple upload
+var file = await client.Files.Upload(fileDataBytes, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl
+});
+
+// Upload with additional options
+var file = await client.Files.Upload(fileDataBytes, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl,
+    ContentType = "CONTENTTYPE",
+    AutoRetry = true,
+    AdditionalFileInfo = new Dictionary<string, string>() {
+        { "key", "value" }
+    },
+    ContentDisposition = "attachment; filename=\"FILENAME\"",
+    ContentLanguage = "en-US",
+    CacheControl = "max-age=3600",
+    ContentEncoding = ContentEncoding.gzip,
+    LegalHold = true,
+    RetentionMode = RetentionMode.compliance,
+    RetainUntilTimestamp = 1640995200000 // milliseconds since Unix epoch
+});
 // { FileId: "",
 //   FileName: "",
+//   Action: "",
 //   ContentLength: "",
 //   ContentSHA1: "",
+//   ContentMD5: "",
 //   ContentType: "",
+//   FileRetention: <FileRetention>,
+//   LegalHold: <LegalHold>,
+//   LegalHoldBool: bool,
 //   FileInfo: Dictionary<string,string> }
 ```
 
 #### Upload a file via Stream
-Please note that there are ceratin limitations when using Streams for upload. Firstly, If you want to use SHA1 hash verification on your uploads
+> [!NOTE]
+> The Upload methods that don't use B2FileUploadContext are deprecated. The new B2FileUploadContext approach provides a more structured and extensible way to handle file uploads.
+
+Please note that there are certain limitations when using Streams for upload. Firstly, If you want to use SHA1 hash verification on your uploads
 you will have to append the SHA1 to the end of your data stream. The library will not do this for you. It is up to you to decide how to get the SHA1
 based on the type of stream you have and how you are handling it. Secondly, you may disable SHA1 verification on the upload by setting the `dontSHA`
 flag to true.
 ```csharp
 var client = new B2Client("KEYID", "APPLICATIONKEY");
 var uploadUrl = await client.Files.GetUploadUrl("BUCKETID");
-var file = await client.Files.Upload("FILESTREAM", "FILENAME", "CONTENTTYPE", uploadUrl, "AUTORETRY", dontSHA, "BUCKETID", "FILEINFOATTRS");
+
+// Simple stream upload
+var file = await client.Files.Upload(fileStream, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl
+}, dontSHA: false);
+
+// Stream upload with additional options
+var file = await client.Files.Upload(fileStream, new B2FileUploadContext() {
+    FileName = "FILENAME",
+    B2UploadUrl = uploadUrl,
+    ContentType = "CONTENTTYPE",
+    AutoRetry = true,
+    AdditionalFileInfo = new Dictionary<string, string>() {
+        { "key", "value" }
+    },
+    ContentDisposition = "attachment; filename=\"FILENAME\"",
+    ContentLanguage = "en-US",
+    CacheControl = "max-age=3600",
+    ContentEncoding = ContentEncoding.gzip,
+    LegalHold = true,
+    RetentionMode = RetentionMode.compliance,
+    RetainUntilTimestamp = 1640995200000 // milliseconds since Unix epoch
+}, dontSHA: false);
 // { FileId: "",
 //   FileName: "",
+//   Action: "",
 //   ContentLength: "",
 //   ContentSHA1: "",
+//   ContentMD5: "",
 //   ContentType: "",
+//   FileRetention: <FileRetention>,
+//   LegalHold: <LegalHold>,
+//   LegalHoldBool: bool,
 //   FileInfo: Dictionary<string,string> }
 ```
 
@@ -250,9 +398,8 @@ var client = new B2Client("KEYID", "APPLICATIONKEY");
 var file = await client.Files.DownloadById("FILEID");
 // { FileId: "",
 //   FileName: "",
-//   ContentLength: "",
+//   Size: 0,
 //   ContentSHA1: "",
-//   ContentType: "",
 //   FileData: byte[],
 //   FileInfo: Dictionary<string,string> }
 ```
@@ -263,9 +410,8 @@ var client = new B2Client("KEYID", "APPLICATIONKEY");
 var file = await client.Files.DownloadName("FILENAME", "BUCKETNAME");
 // { FileId: "",
 //   FileName: "",
-//   ContentLength: "",
+//   Size: 0,
 //   ContentSHA1: "",
-//   ContentType: "",
 //   FileData: byte[],
 //   FileInfo: Dictionary<string,string> }
 ```
@@ -276,10 +422,14 @@ var client = new B2Client("KEYID", "APPLICATIONKEY");
 var file = await client.Files.Copy("FILEID", "NEWFILENAME");
 // { FileId: "",
 //   FileName: "",
+//   Action: "",
 //   ContentLength: "",
 //   ContentSHA1: "",
+//   ContentMD5: "",
 //   ContentType: "",
-//   FileData: byte[],
+//   FileRetention: <FileRetention>,
+//   LegalHold: <LegalHold>,
+//   LegalHoldBool: bool,
 //   FileInfo: Dictionary<string,string> }
 ```
 
@@ -289,10 +439,14 @@ var client = new B2Client("KEYID", "APPLICATIONKEY");
 var file = await client.Files.Copy("FILEID", "NEWFILENAME", B2MetadataDirective.REPLACE, "CONTENT/TYPE");
 // { FileId: "",
 //   FileName: "",
+//   Action: "",
 //   ContentLength: "",
 //   ContentSHA1: "",
+//   ContentMD5: "",
 //   ContentType: "",
-//   FileData: byte[],
+//   FileRetention: <FileRetention>,
+//   LegalHold: <LegalHold>,
+//   LegalHoldBool: bool,
 //   FileInfo: Dictionary<string,string> }
 ```
 
@@ -338,10 +492,14 @@ var client = new B2Client("KEYID", "APPLICATIONKEY");
 var file = client.Files.GetInfo("FILEID").Result;
 // { FileId: "",
 //   FileName: "",
-//   ContentSHA1: "",
-//   BucketId: "",
+//   Action: "",
 //   ContentLength: "",
+//   ContentSHA1: "",
+//   ContentMD5: "",
 //   ContentType: "",
+//   FileRetention: <FileRetention>,
+//   LegalHold: <LegalHold>,
+//   LegalHoldBool: bool,
 //   FileInfo: Dictionary<string,string> }
 ```
 
@@ -367,6 +525,7 @@ should retry the request if you are so inclined.
 
 ## Release Notes
 
+*  0.8.0  Major refactoring. Dropped support for .NET 4.5 and Standard 1.6. Removed Netwonsoft in favor of System.Text.Json. Attempted to clean up some of the gross code.
 *  0.7.5  Stream uploading.
 *  0.7.4  Content-Type setting on Upload.
 *  0.7.3  Thread-safeish HttpClient.
@@ -406,3 +565,4 @@ From the tests directory run
 dotnet restore
 dotnet test
 ```
+
